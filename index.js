@@ -12,7 +12,7 @@ class CrawlPokemon {
             tutor: '#By_tutoring',
             level: '#By_leveling_up',
             egg: '#By_breeding',
-            stats: '#Stats'
+            stats: '#Base_stats'
         }
         this.hasRetriedLoad = false
         this.pokemon = pokemon.replace('’', "'")
@@ -112,16 +112,18 @@ class CrawlPokemon {
         const rawTables = statsHeader.nextUntil(tagName).filter('table').get()
         const tableData = {}
         let currentFormeHeader = null
+        let skipFlag = true
         for (const e of rawTables) {
             const t = this.$(e)
             const header = t.prev().get(0)
             const formeHeader = t.prev().prev().get(0)
+            if ((formeHeader.tagName === 'h3' || header.tagName === 'h3') && !skipFlag) break
             if (formeHeader.tagName === 'h5') {
                 currentFormeHeader = this.#parseHeaderText(formeHeader)
-            } else if (['h4', 'h5'].includes(header.tagName)) {
+            } else if (!currentFormeHeader) {
                 tableData[this.#parseHeaderText(header)] = t
-                currentFormeHeader = null
             }
+
             if (currentFormeHeader) {
                 const headerText = this.#parseHeaderText(header)
                 if (tableData.hasOwnProperty(currentFormeHeader)) {
@@ -132,6 +134,7 @@ class CrawlPokemon {
                     tableData[currentFormeHeader] = tableObj
                 }
             }
+            skipFlag = false
         }
         return tableData
     }
@@ -228,7 +231,6 @@ class CrawlPokemon {
         const data = {}
         const tables = this.#getStatTables()
         for (const t in tables) {
-            if (t === 'Pokéathlon stats') continue
             if (tables[t].formeHeader) {
                 delete tables[t].formeHeader
                 data[t] = {}
@@ -296,7 +298,7 @@ class CrawlPokemon {
         } catch (e) {
             if (this.hasRetriedLoad || e?.status !== 404) {
                 console.error(`HTTP: ${e?.status || 500} | ${this.pokemon}`)
-                console.log(e)
+                console.error(e)
                 return false
             }
             const pokemonNameSplit = this.pokemon.split(' ')

@@ -1,4 +1,4 @@
-# Bulba Crawler
+# Poke Crawl
 
 A lightweight [Bulbapedia](https://bulbapedia.bulbagarden.net/wiki/Main_Page) scraper written in vanilla JavaScript. 
 
