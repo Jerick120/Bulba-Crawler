@@ -57,6 +57,8 @@ class CrawlPokemon {
         return final
     }
 
+    #parseHeaderText = (header) => this.$(header).find('span').text().trim()
+
     #getPokemonGen = () => {
         const text = this.store.default('.infobox').nextAll('p').first().find('a[title^=Generation]').first().text()
         const parsed = text.toLowerCase().replace('generation', '').trim().toUpperCase()
@@ -107,11 +109,30 @@ class CrawlPokemon {
         const statsHeader = this.$(this.idMap.stats).parent()
         const tagName = statsHeader.get(0).tagName
         const rawTables = statsHeader.nextUntil(tagName).filter('table').get()
-        return Object.fromEntries(rawTables.map(e => {
+        const tableData = {}
+        let currentFormeHeader = null
+        for (const e of rawTables) {
             const t = this.$(e)
-            const header = t.prev().find('span').text().trim()
-            return [header, t]
-        }))
+            const header = t.prev().get(0)
+            const formeHeader = t.prev().prev().get(0)
+            if (formeHeader.tagName === 'h5') {
+                currentFormeHeader = this.#parseHeaderText(formeHeader)
+            } else if (['h4', 'h5'].includes(header.tagName)) {
+                tableData[this.#parseHeaderText(header)] = t
+                currentFormeHeader = null
+            }
+            if (currentFormeHeader) {
+                const headerText = this.#parseHeaderText(header)
+                if (tableData.hasOwnProperty(currentFormeHeader)) {
+                    tableData[currentFormeHeader][headerText] = t
+                } else {
+                    const tableObj = { formeHeader: true }
+                    tableObj[headerText] = t
+                    tableData[currentFormeHeader] = tableObj
+                }
+            }
+        }
+        return tableData
     }
 
     #getTableColumnNames = (table) => {
@@ -207,6 +228,14 @@ class CrawlPokemon {
         const tables = this.#getStatTables()
         for (const t in tables) {
             if (t === 'Pokéathlon stats') continue
+            if (tables[t].formeHeader) {
+                delete tables[t].formeHeader
+                data[t] = {}
+                for (const st in tables[t]) {
+                    data[t][st] = this.#getStatsFromTable(tables[t][st])
+                }
+                continue
+            }
             data[t] = this.#getStatsFromTable(tables[t])
         }
         return data
