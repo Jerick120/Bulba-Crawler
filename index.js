@@ -6,7 +6,7 @@ const regularToRoman = require('./data/regularToRoman.json')
 const statMap = require('./data/statMap.json')
 
 class CrawlPokemon {
-    constructor(pokemon) {
+    constructor(pokemon, ua) {
         this.idMap = {
             tm: ['#By_TM', '#=By_TM', '#By_[[TM]', '#By_TM/HM', '#By_TM/TR'],
             tutor: '#By_tutoring',
@@ -16,6 +16,7 @@ class CrawlPokemon {
         }
         this.hasRetriedLoad = false
         this.pokemon = pokemon.replace('’', "'")
+        this.ua = ua || null
         this.pokemonGen = null
         this.currentGen = 9
         this.type = null
@@ -40,7 +41,7 @@ class CrawlPokemon {
     #setStore = async (gen, endpoint) => {
         try {
             if (!this.store[gen]) {
-                const t = await getPokemon(this.pokemon, endpoint)
+                const t = await getPokemon(this.pokemon, endpoint, this.ua)
                 this.store[gen] = cheerio.load(t.data)
             }
             this.$ = this.store[gen]
@@ -281,7 +282,7 @@ class CrawlPokemon {
 
     load = async () => {
         try {
-            const data = await getPokemon(this.pokemon)
+            const data = await getPokemon(this.pokemon, '', this.ua)
             this.store.default = cheerio.load(data.data)
             const init = await this.#init()
             if (init) {
