@@ -1,0 +1,9 @@
+{
+    "HP": "hp",
+    "Attack": "atk",
+    "Defense": "def",
+    "Sp. Atk": "spa",
+    "Sp. Def": "spd",
+    "Speed": "spe",
+    "Total": "base_stats_total"
+}
