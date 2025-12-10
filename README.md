@@ -1,6 +1,8 @@
 # Bulba Crawler
 
-A lightweight [Bulbapedia](https://bulbapedia.bulbagarden.net/wiki/Main_Page) scraper written in vanilla JavaScript. This tool is used to generate datasets for the [Pokecord++](https://pokecord.org) Discord bot.
+A lightweight [Bulbapedia](https://bulbapedia.bulbagarden.net/wiki/Main_Page) scraper written in vanilla JavaScript. 
+
+This tool is used to generate datasets for the [Pokecord++](https://pokecord.org) Discord bot.
 
 # Usage
 
